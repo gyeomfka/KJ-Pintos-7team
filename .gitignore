@@ -2,3 +2,4 @@ threads/build
 my_test/error
 my_test/output
 my_test/result
+*/compile_commands.json

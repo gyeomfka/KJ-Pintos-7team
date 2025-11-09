@@ -60,7 +60,7 @@ windows:
           - tm.1_title 'build for thread project'
           - docker exec -it jg-c-w9 bash
           - cd /workspace/threads
-          - cmd: make
+          - cmd: bear -- make && sed -i 's|/workspace|/home/sy/jg/04.pintos/7team|g' compile_commands.json && mv compile_commands.json /workspace/compile_commands.json
             enter: false
         focus: true
       - shell_command:
