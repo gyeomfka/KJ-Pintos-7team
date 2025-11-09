@@ -1,0 +1,90 @@
+session_name: jg-W9
+start_directory: /home/sy/jg/04.pintos/7team
+suppress_history: false
+windows:
+  - window_name: document
+    layout: 6e5e,213x59,0,0{168x59,0,0,7,44x59,169,0,8}
+    focus: true
+    panes:
+      - shell_command: vi -c 'cd ~/Documents/dev-wiki | VimwikiIndex'
+        focus: true
+      - shell_command:
+          - cd ../my-wiki
+          - lsd | sort
+
+  - window_name: test_code
+    panes:
+      - shell_command:
+          - tm.1_title 'editor'
+          - vi tests/threads/tests.c
+        focus: true
+
+  - window_name: code
+    panes:
+      - shell_command:
+          - tm.1_title 'editor'
+          - vi .
+        focus: true
+
+  - window_name: run_test
+    layout: 6724,116x62,0,0{23x62,0,0[23x30,0,0,140,23x31,0,31,142],20x62,24,0,141,48x62,45,0,143,22x62,94,0,144}
+    panes:
+      - shell_command:
+          - tm.1_title 'run pintos'
+          - docker exec -it jg-c-w9 bash
+          - cd /workspace/my_test
+          - ./test_thread.sh
+        focus: true
+      - shell_command:
+          - tm.1_title 'result'
+          - watch -n 1 'cat my_test/result'
+      - shell_command:
+          - tm.1_title 'test_script'
+          - vi my_test/test_thread.sh
+      - shell_command:
+          - tm.1_title 'output'
+          - watch -n 1 'cat my_test/output'
+      - shell_command:
+          - tm.1_title 'error'
+          - watch -n 1 'cat my_test/error'
+
+  - window_name: docker_build
+    layout: 92cd,119x65,0,0{59x65,0,0[59x15,0,0,145,59x16,0,16,157,59x32,0,33,146],59x65,60,0[59x30,60,0{6x30,60,0,147,52x30,67,0,148},59x18,60,31,149,59x15,60,50,150]}
+    panes:
+      - shell_command:
+          - tm.1_title 'auto make'
+          - docker exec -it jg-c-w9 bash
+          - cd /workspace/threads
+          - watch -n 1 'make'
+      - shell_command:
+          - tm.1_title 'build for thread project'
+          - docker exec -it jg-c-w9 bash
+          - cd /workspace/threads
+          - cmd: make
+            enter: false
+        focus: true
+      - shell_command:
+          - docker exec -it jg-c-w9 bash
+          - htop
+      - shell_command: vi config/Dockerfile
+      - shell_command: lazydocker
+      - shell_command:
+          - tm.1_title 'build image'
+          - cmd: docker build -t jg-c-w9 config/
+            enter: false
+      - shell_command:
+          - tm.1_title 'run daemon container'
+          - cmd: docker run -d --name jg-c-w9 -v "$(git-root)/:/workspace" --network=host jg-c-w9
+            enter: false
+
+  - window_name: config
+    layout: even-horizontal
+    panes:
+      - shell_command: vi config/tmuxp.yaml
+
+  - window_name: debug
+    panes:
+      - shell_command:
+          - tm.1_title 'debugger'
+          - cmd: "gdb"
+            enter: false
