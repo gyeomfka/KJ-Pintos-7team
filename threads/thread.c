@@ -28,6 +28,8 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+static struct list sleep_list;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -108,6 +110,8 @@ thread_init (void) {
 	/* Init the globla thread context */
 	lock_init (&tid_lock);
 	list_init (&ready_list);
+	list_init (&sleep_list);
+
 	list_init (&destruction_req);
 
 	/* Set up a thread structure for the running thread. */
@@ -461,7 +465,11 @@ do_iret (struct intr_frame *tf) {
 
    It's not safe to call printf() until the thread switch is
    complete.  In practice that means that printf()s should be
-   added at the end of the function. */
+   added at the end of the function. 
+   
+    이 함수는 현재 실행 중인 스레드의 상태를 저장하고,
+	새로 전환할 스레드의 상태를 복원합니다.
+   */
 static void
 thread_launch (struct thread *th) {
 	uint64_t tf_cur = (uint64_t) &running_thread ()->tf;
@@ -587,4 +595,45 @@ allocate_tid (void) {
 	lock_release (&tid_lock);
 
 	return tid;
+}
+
+void thread_sleep(int64_t ticks) {
+	// printf(" ::: test  ::: %lld", ticks);
+	enum intr_level old_level = intr_disable(); // 인터럽트 비활성화
+
+	struct thread *cur = thread_current();
+	cur->wakeup_ticks = ticks;
+
+	list_insert_ordered(&sleep_list, &cur->elem, 
+					(list_less_func *) cmp_wakeup_tick, NULL);
+
+	thread_block();
+
+	intr_set_level(old_level);
+}
+
+bool cmp_wakeup_tick(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) {
+	struct thread *ta = list_entry(a, struct thread, elem);
+	struct thread *tb = list_entry(b, struct thread, elem);
+	return ta->wakeup_ticks < tb->wakeup_ticks;
+}
+
+void thread_awake(int64_t ticks) {
+	enum intr_level old_level = intr_disable(); // 인터럽트 비활성
+
+	struct list_elem *curr_elem = list_begin(&sleep_list);
+	while (curr_elem != list_end(&sleep_list))
+	{
+		struct thread *curr_thread = list_entry(curr_elem, struct thread, elem); // 현재 검사중인 elem의 스레드
+
+		if (ticks >= curr_thread->wakeup_ticks) // 깰 시간이 됐으면
+		{
+			curr_elem = list_remove(curr_elem); // sleep_list에서 제거, curr_elem에는 다음 elem이 담김
+			thread_unblock(curr_thread);        // ready_list로 이동
+		}
+		else
+			break;
+	}
+
+	intr_set_level(old_level); // 인터럽트 상태를 원래 상태로 변경
 }
