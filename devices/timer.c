@@ -10,6 +10,11 @@
 
 /* See [8254] for hardware details of the 8254 timer chip. */
 
+/**
+이 코드는 8254 프로그램 가능 인터벌 타이머(PIT, Programmable Interval Timer)를 제어합니다.
+8254 칩의 하드웨어 세부 정보는 [8254 문서]를 참고하라는 뜻입니다.
+*/
+
 #if TIMER_FREQ < 19
 #error 8254 timer requires TIMER_FREQ >= 19
 #endif
@@ -22,6 +27,11 @@ static int64_t ticks;
 
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
+
+/**
+한 타이머 틱(tick) 동안 수행 가능한 반복(loop) 횟수를 저장하는 변수입니다.
+timer_calibrate() 함수에서 실제 CPU 속도에 맞게 보정됩니다.
+*/
 static unsigned loops_per_tick;
 
 static intr_handler_func timer_interrupt;
@@ -32,6 +42,11 @@ static void real_time_sleep (int64_t num, int32_t denom);
 /* Sets up the 8254 Programmable Interval Timer (PIT) to
    interrupt PIT_FREQ times per second, and registers the
    corresponding interrupt. */
+/*
+의미:
+8254 PIT을 설정하여 1초에 TIMER_FREQ번 인터럽트를 발생시키도록 구성하고,
+이 타이머 인터럽트를 커널에 등록합니다.
+*/
 void
 timer_init (void) {
 	/* 8254 input frequency divided by TIMER_FREQ, rounded to
@@ -46,6 +61,10 @@ timer_init (void) {
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
+/*
+loops_per_tick 값을 보정(calibration)합니다.
+이는 CPU의 속도에 맞는 정확한 “짧은 시간 지연(delay)”을 구현하는 데 사용됩니다.
+*/
 void
 timer_calibrate (void) {
 	unsigned high_bit, test_bit;
@@ -71,6 +90,10 @@ timer_calibrate (void) {
 }
 
 /* Returns the number of timer ticks since the OS booted. */
+/*
+운영체제가 부팅된 이후 지난 타이머 틱의 개수를 반환합니다.
+(즉, 부팅 후 경과된 시간의 단위)
+*/
 int64_t
 timer_ticks (void) {
 	enum intr_level old_level = intr_disable ();
@@ -88,13 +111,44 @@ timer_elapsed (int64_t then) {
 }
 
 /* Suspends execution for approximately TICKS timer ticks. */
+/*
+ * 현재는 busy waiting 방식으로 동작한다
+현재 시간 확인 -> 루프를 돌며 -> thread_yield() 호출 -> 충분한 시간이 지날 때까지 대기 
+*/
+/**
+ * 바로 sleep list 로 가기전에 ready list에 존재한다 ?
+ * -> running 중인 스레드이므로 ready_list 에는 포함되지 않는다.
+*/
 void
-timer_sleep (int64_t ticks) {
-	int64_t start = timer_ticks ();
-
+timer_sleep (int64_t ticks) { //param == 스레드를 잠들게 할 타이머 틱 수 
+	/**
+	 * 현재 시스템의 타이머 틱 수를 가져와 start에 저장
+	 * 잠들기 시작한 시점을 기록하는 부분
+	 * timer_ticks() -> 현재까지 지난 틱 수를 반환하는 함수
+	*/
+	int64_t start = timer_ticks (); 
+	/**
+	 * 인터럽트가 켜져 있는지 확인하는 검증
+		intr_get_level()은 현재 인터럽트 상태를 반환하고, INTR_ON은 켜져 있는 상태를 의미합니다.
+	*/
 	ASSERT (intr_get_level () == INTR_ON);
-	while (timer_elapsed (start) < ticks)
-		thread_yield ();
+	/**
+	 * time_elapsed(start) -> start 시점 이후 경과한 틱 수를 반환
+	 * 	아직 지정된 tick 만큼 시간이 지나지 않았으면 루프를 계속 돌림
+	*/
+	/* 
+		ASIS:
+	*/
+	// while (timer_elapsed (start) < ticks)
+	// 	thread_yield ();
+	/**
+	 * TODO: ticks동안 block list 에 해당 thread를 넣어둔다.
+	*/
+	// thread_block();
+	// struct thread *this_t = thread_current ();
+	// this_t->wakeup_ticks = start + ticks;
+	// printf(" ::: sleep test ::: ");
+	thread_sleep(start + ticks);
 }
 
 /* Suspends execution for approximately MS milliseconds. */
@@ -122,10 +176,18 @@ timer_print_stats (void) {
 }
 
 /* Timer interrupt handler. */
+/**
+ * 매 틱마다 인터럽트를 발생시켜 커널로 제어권을 넘김
+ * -> 이 개념을 알아야 "얼마나 기다릴지"를 시간 단위로 측정할 수 있음
+*/
 static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
+	// putbuf(" ::: interrupt test ::: \n", 23);
+	// enum intr_level old_level = intr_disable();
+	thread_awake(ticks);
+	// intr_set_level(old_level);
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
