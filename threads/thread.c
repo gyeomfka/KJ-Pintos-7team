@@ -230,11 +230,14 @@ tid_t thread_create(const char* name,
    is usually a better idea to use one of the synchronization
    primitives in synch.h. */
 void thread_block(void) {
+    struct thread* curr = thread_current();
+
     ASSERT(!intr_context());
     ASSERT(intr_get_level() == INTR_OFF);
-    struct thread* t = thread_current();
-    t->status = THREAD_BLOCKED;
-    if (!strstr(t->name, "idle")) list_push_front(&sleep_list, &t->elem);
+
+    curr->status = THREAD_BLOCKED;
+    if (curr != idle_thread) list_push_front(&sleep_list, &curr->elem);
+
     schedule();
 }
 
