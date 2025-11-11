@@ -155,15 +155,12 @@ void thread_tick(void) {
 void awake(int64_t total_elapsed) {
     if (list_empty(&sleep_list)) return;  // early return
 
-    printf("\n-------------------- start\n");
     struct thread* top;
     size_t listLen = list_size(&sleep_list);
 
     for (size_t i = 0; i < listLen; i++)
     {
         top = list_entry(list_pop_front(&sleep_list), struct thread, elem);
-
-        printf("waketime: %lld\n", top->wakeup_time);
 
         if (top->wakeup_time - total_elapsed <= 0)
             thread_unblock(top);
@@ -172,7 +169,6 @@ void awake(int64_t total_elapsed) {
 
         top = list_entry(list_next(&top->elem), struct thread, elem);
     }
-    printf("-------------------- end\n\n");
 }
 
 /* Prints thread statistics. */
