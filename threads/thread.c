@@ -63,9 +63,9 @@ static void init_thread(struct thread*, const char* name, int priority);
 static void do_schedule(int status);
 static void schedule(void);
 static tid_t allocate_tid(void);
-static bool soonner_first(const struct list_elem* a,
-                          const struct list_elem* b,
-                          void* _);
+static bool sooner_first(const struct list_elem* a,
+                         const struct list_elem* b,
+                         void* _);
 
 /* Returns true if T appears to point to a valid thread. */
 #define is_thread(t) ((t) != NULL && (t)->magic == THREAD_MAGIC)
@@ -240,15 +240,15 @@ void thread_block(void) {
 
     curr->status = THREAD_BLOCKED;
     if (curr != idle_thread)
-        list_insert_ordered(&sleep_list, &curr->elem, soonner_first, NULL);
+        list_insert_ordered(&sleep_list, &curr->elem, sooner_first, NULL);
 
     schedule();
 }
 
 // 빨랑 깨워야하는 애들부터 정렬
-bool soonner_first(const struct list_elem* a,
-                   const struct list_elem* b,
-                   void* _) {
+bool sooner_first(const struct list_elem* a,
+                  const struct list_elem* b,
+                  void* _) {
     int64_t wakeupA = list_entry(a, struct thread, elem)->wakeup_time;
     int64_t wakeupB = list_entry(b, struct thread, elem)->wakeup_time;
 
