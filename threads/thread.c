@@ -55,6 +55,7 @@ static unsigned thread_ticks; /* # of timer ticks since last yield. */
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
 
+static void print_list(struct list* L);
 static void kernel_thread(thread_func*, void* aux);
 
 static void idle(void* aux UNUSED);
@@ -614,4 +615,27 @@ static tid_t allocate_tid(void) {
     lock_release(&tid_lock);
 
     return tid;
+}
+
+// 리스트 순회하며 이름과 우선순위 printf
+// @param ready_list, sleep_list
+void print_list(struct list* L) {
+    printf("------------------- list print START\n");
+    if (list_empty(L))
+    {
+        printf("list empty\n");
+        return;
+    }
+
+    struct thread* front = list_entry(list_front(L), struct thread, elem);
+
+    size_t len = list_size(L);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        printf("%zuth ele, name: %s, prio: %d\n", i, front->name,
+               front->priority);
+        front = list_entry(list_next(&front->elem), struct thread, elem);
+    }
+    printf("------------------- list print END\n");
 }
