@@ -12,7 +12,7 @@
 
 static void test_sleep(int thread_cnt, int iterations);
 
-void test_alarm_single(void) { test_sleep(15, 1); }
+void test_alarm_single(void) { test_sleep(5, 1); }
 
 void test_alarm_multiple(void) { test_sleep(5, 7); }
 
@@ -78,9 +78,7 @@ static void test_sleep(int thread_cnt, int iterations) {
         t->iterations = 0;
 
         snprintf(name, sizeof name, "thread %d", i);
-        int k = i % 2 == 1 ? PRI_DEFAULT : PRI_DEFAULT + 15;
-        /* thread_create(name, PRI_DEFAULT, sleeper, t); */
-        thread_create(name, k, sleeper, t);
+        thread_create(name, PRI_DEFAULT, sleeper, t);
     }
 
     /* Wait long enough for all the threads to finish. */
