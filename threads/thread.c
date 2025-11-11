@@ -27,6 +27,7 @@
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
+static struct list sleep_list;
 
 /* Idle thread. */
 static struct thread* idle_thread;
@@ -104,6 +105,7 @@ void thread_init(void) {
     /* Init the globla thread context */
     lock_init(&tid_lock);
     list_init(&ready_list);
+    list_init(&sleep_list);
     list_init(&destruction_req);
 
     /* Set up a thread structure for the running thread. */
@@ -144,6 +146,26 @@ void thread_tick(void) {
 
     /* Enforce preemption. */
     if (++thread_ticks >= TIME_SLICE) intr_yield_on_return();
+}
+
+// 자는애가 하나라도 있으면 깨운다.(thread_unblock)
+void awake(int64_t total_elapsed) {
+    if (list_empty(&sleep_list)) return;  // early return
+
+    struct thread* top;
+    size_t listLen = list_size(&sleep_list);
+
+    for (size_t i = 0; i < listLen; i++)
+    {
+        top = list_entry(list_pop_front(&sleep_list), struct thread, elem);
+
+        if (top->wakeup_time - total_elapsed <= 0)
+            thread_unblock(top);
+        else
+            list_push_back(&sleep_list, &top->elem);
+
+        top = list_entry(list_next(&top->elem), struct thread, elem);
+    }
 }
 
 /* Prints thread statistics. */
@@ -210,7 +232,9 @@ tid_t thread_create(const char* name,
 void thread_block(void) {
     ASSERT(!intr_context());
     ASSERT(intr_get_level() == INTR_OFF);
-    thread_current()->status = THREAD_BLOCKED;
+    struct thread* t = thread_current();
+    t->status = THREAD_BLOCKED;
+    if (!strstr(t->name, "idle")) list_push_front(&sleep_list, &t->elem);
     schedule();
 }
 

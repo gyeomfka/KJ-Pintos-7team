@@ -90,6 +90,7 @@ struct thread {
     enum thread_status status; /* Thread state. */
     char name[16];             /* Name (for debugging purposes). */
     int priority;              /* Priority. */
+    int64_t wakeup_time;       /* Wake up time */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem; /* List element. */
@@ -113,6 +114,7 @@ struct thread {
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+void awake(int64_t);
 void thread_init(void);
 void thread_start(void);
 
