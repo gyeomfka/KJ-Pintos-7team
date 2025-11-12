@@ -269,7 +269,7 @@ bool high_priority_first(const struct list_elem* a,
     int64_t wakeupA = list_entry(a, struct thread, elem)->priority;
     int64_t wakeupB = list_entry(b, struct thread, elem)->priority;
 
-    if (wakeupB - wakeupA <= 0) return true;
+    if (wakeupB - wakeupA < 0) return true;
 
     return false;
 }
