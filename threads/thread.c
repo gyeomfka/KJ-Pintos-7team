@@ -227,6 +227,11 @@ tid_t thread_create(const char* name,
     /* Add to run queue. */
     thread_unblock(t);
 
+    // 새로운 쓰레드가 ready_list에 추가 된 때,
+    // 그것이 만약 현재 running 쓰레드보다 우선순위가 높다면
+    // 새로운 쓰레드에게 즉시 CPU 양보
+    if (t->priority > thread_current()->priority) thread_yield();
+
     return tid;
 }
 
