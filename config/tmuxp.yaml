@@ -10,7 +10,7 @@ windows:
         focus: true
       - shell_command:
           - cd ../my-wiki
-          - lsd | sort
+          - vi .
 
   - window_name: test_code
     panes:
@@ -27,7 +27,7 @@ windows:
         focus: true
 
   - window_name: run_test
-    layout: 6724,116x62,0,0{23x62,0,0[23x30,0,0,140,23x31,0,31,142],20x62,24,0,141,48x62,45,0,143,22x62,94,0,144}
+    layout: 19b7,240x65,0,0{54x65,0,0[54x25,0,0,9,54x39,0,26,11],185x65,55,0[185x32,55,0{99x32,55,0,10,60x32,155,0,13,24x32,216,0,15},185x32,55,33{146x32,55,33,14,38x32,202,33,12}]}
     panes:
       - shell_command:
           - tm.1_title 'run pintos'
@@ -36,17 +36,25 @@ windows:
           - ./test_thread.sh
         focus: true
       - shell_command:
-          - tm.1_title 'result'
-          - watch -n 1 'cat my_test/result'
-      - shell_command:
           - tm.1_title 'test_script'
           - vi my_test/test_thread.sh
       - shell_command:
+          - tm.1_title 'result'
+          - watch -n 1 'cat my_test/result'
+      - shell_command:
           - tm.1_title 'output'
+          - docker exec -it jg-c-w9 bash
           - watch -n 1 'cat my_test/output'
       - shell_command:
           - tm.1_title 'error'
           - watch -n 1 'cat my_test/error'
+      - shell_command:
+          - tm.1_title 'output buf'
+          - vi my_test/output
+      - shell_command:
+          - tm.1_title 'pintos help'
+          - docker exec -it jg-c-w9 bash
+          - pintos -h
 
   - window_name: docker_build
     layout: 92cd,119x65,0,0{59x65,0,0[59x15,0,0,145,59x16,0,16,157,59x32,0,33,146],59x65,60,0[59x30,60,0{6x30,60,0,147,52x30,67,0,148},59x18,60,31,149,59x15,60,50,150]}
