@@ -66,11 +66,13 @@ void sema_down(struct semaphore* sema) {
     old_level = intr_disable();
     if (sema->value == 0)
     {
+        thread_current()->waiting_sema = sema;
         list_insert_ordered(&sema->waiters, &thread_current()->elem,
                             high_priority_first, NULL);
         thread_block();
     }
     sema->value--;
+    thread_current()->waiting_sema = NULL;
     intr_set_level(old_level);
 }
 
@@ -115,6 +117,25 @@ void sema_up(struct semaphore* sema) {
     sema->value++;
     intr_set_level(old_level);
     thread_yield();
+}
+
+void reorder_sema_waiters(struct semaphore* sema) {
+    if (list_empty(&sema->waiters)) return;
+
+    struct list temp;
+    list_init(&temp);
+
+    while (!list_empty(&sema->waiters))
+    {
+        struct list_elem* e = list_pop_front(&sema->waiters);
+        list_insert_ordered(&temp, e, high_priority_first, NULL);
+    }
+
+    while (!list_empty(&temp))
+    {
+        struct list_elem* e = list_pop_front(&temp);
+        list_push_back(&sema->waiters, e);
+    }
 }
 
 static void sema_test_helper(void* sema_);
@@ -198,6 +219,11 @@ void lock_acquire(struct lock* lock) {
         if (curr->priority > lock->holder->priority)
         {
             lock->holder->priority = curr->priority;
+
+            // If holder is waiting on a semaphore, reorder it
+            if (lock->holder->waiting_sema != NULL)
+                reorder_sema_waiters(lock->holder->waiting_sema);
+
             update_donation_chain(lock->holder);  // 연쇄 기부
         }
     }

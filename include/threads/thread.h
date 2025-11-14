@@ -96,6 +96,8 @@ struct thread {
     /* For priority donation. */
     struct lock* waiting_lock; /* Lock that this thread is waiting for. */
     struct list donation_list; /* List of threads donating to this thread. */
+    struct semaphore*
+        waiting_sema; /* Semaphore that this thread is waiting for. */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;          /* List element. */

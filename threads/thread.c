@@ -489,6 +489,7 @@ static void init_thread(struct thread* t, const char* name, int priority) {
     t->priority = priority;
     t->base_priority = priority;
     t->waiting_lock = NULL;
+    t->waiting_sema = NULL;
     list_init(&t->donation_list);
     t->magic = THREAD_MAGIC;
 }
