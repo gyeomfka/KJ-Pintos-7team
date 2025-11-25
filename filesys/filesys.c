@@ -74,7 +74,6 @@ struct file* filesys_open(const char* name) {
     struct dir* dir = dir_open_root();
     struct inode* inode = NULL;
 
-    printf("name: %s\n", name);
     if (dir != NULL) dir_lookup(dir, name, &inode);
     dir_close(dir);
 
