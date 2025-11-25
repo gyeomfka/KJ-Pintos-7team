@@ -1,5 +1,6 @@
 #include "filesys/file.h"
 #include <debug.h>
+#include <stdio.h>
 #include "filesys/inode.h"
 #include "threads/malloc.h"
 
@@ -17,6 +18,7 @@ struct file* file_open(struct inode* inode) {
     struct file* file = calloc(1, sizeof *file);
     if (inode != NULL && file != NULL)
     {
+        printf("file open success\n");
         file->inode = inode;
         file->pos = 0;
         file->deny_write = false;
@@ -24,6 +26,7 @@ struct file* file_open(struct inode* inode) {
     }
     else
     {
+        printf("file open fail\n");
         inode_close(inode);
         free(file);
         return NULL;
