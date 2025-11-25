@@ -36,6 +36,7 @@ static void process_init(void) { struct thread* current = thread_current(); }
  * thread id, or TID_ERROR if the thread cannot be created.
  * Notice that THIS SHOULD BE CALLED ONCE. */
 tid_t process_create_initd(const char* file_name) {
+    printf("I run 1st\n");
     char* fn_copy;
     tid_t tid;
 
@@ -48,6 +49,7 @@ tid_t process_create_initd(const char* file_name) {
     /* Create a new thread to execute FILE_NAME. */
     tid = thread_create(file_name, PRI_DEFAULT, initd, fn_copy);
     if (tid == TID_ERROR) palloc_free_page(fn_copy);
+    printf("I run 2nd\n");
     return tid;
 }
 
@@ -182,7 +184,9 @@ int process_exec(void* f_name) {
  * This function will be implemented in problem 2-2.  For now, it
  * does nothing. */
 int process_wait(tid_t child_tid UNUSED) {
-    for (;;);
+    printf("I run 3rd\n");
+    for (;;) printf("I run 4th\n");
+
     /* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
      * XXX:       to add infinite loop here before
      * XXX:       implementing the process_wait. */
