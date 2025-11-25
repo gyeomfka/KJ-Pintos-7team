@@ -311,13 +311,19 @@ static bool load(const char* file_name, struct intr_frame* if_) {
     bool success = false;
     int i;
 
+    // file_name을 fileName + args로 나누기
+    char fileName[MAXLEN_FILENAME];                         // 이름만 분리
+    char* args;                                             // 나머지(arguments)
+    strlcpy(fileName, (char*)file_name, sizeof(fileName));  // 원본은 보존
+    strtok_r(fileName, " ", &args);
+
     /* Allocate and activate page directory. */
     t->pml4 = pml4_create();
     if (t->pml4 == NULL) goto done;
     process_activate(thread_current());
 
     /* Open executable file. */
-    file = filesys_open(file_name);
+    file = filesys_open(fileName);
     if (file == NULL)
     {
         printf("load: %s: open failed\n", file_name);

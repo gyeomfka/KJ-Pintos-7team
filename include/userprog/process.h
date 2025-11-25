@@ -10,4 +10,9 @@ int process_wait(tid_t);
 void process_exit(void);
 void process_activate(struct thread* next);
 
+#define MAXLEN_FILENAME \
+    128  // "There is an unrelated limit of 128 bytes on command-line
+         // arguments that the pintos utility can pass to the kernel."
+         // from gitbook
+
 #endif /* userprog/process.h */
