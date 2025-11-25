@@ -89,6 +89,7 @@ struct thread {
     tid_t tid;                 /* Thread identifier. */
     enum thread_status status; /* Thread state. */
     char name[16];             /* Name (for debugging purposes). */
+    int exitStatus;            // exit syscall을 호출할 경우의 상태를 기록
     int priority;              /* Priority. */
     int base_priority;         /* Base priority (before donation). */
     int64_t wakeup_time;       /* Wake up time */

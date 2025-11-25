@@ -55,9 +55,31 @@ static bool is_valid_address(void* addr) {
 
 /* The main system call interface */
 void syscall_handler(struct intr_frame* f UNUSED) {
+    struct thread* curr = thread_current();
+
     switch (f->R.rax)
     {
-        case SYS_HALT: power_off();
+        case SYS_HALT: {
+            power_off();
+        }
+
+        case SYS_EXIT: {
+            // TODO:: 자원회수 해야함
+            // - 각종 대기열에서 제거
+            // - 세마포어
+            // - (페이지 테이블의 맵핑된 영역 및 페이지 디렉토리 자체는 이미
+            // 구현됨)
+
+            curr->exitStatus = f->R.rdi;
+
+            // WARN::
+            // 현재는 thread_exit하면 바로 TCB까지 회수된다.
+            // 일단 좀비 상태로 기다려야하고, 부모가 wait를 호출해서
+            // exitStatus를 받아줄 때까지 대기한다.
+            // - 세마포어 등 활용 필요
+            thread_exit();
+        }
+
         default: thread_exit();
     }
     // SYS_FORK,     /* Clone current process. */
