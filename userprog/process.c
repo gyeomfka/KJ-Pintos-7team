@@ -311,11 +311,20 @@ static bool load(const char* file_name, struct intr_frame* if_) {
     bool success = false;
     int i;
 
-    // file_name을 fileName + args로 나누기
-    char fileName[MAXLEN_FILENAME];                         // 이름만 분리
-    char* args;                                             // 나머지(arguments)
-    strlcpy(fileName, (char*)file_name, sizeof(fileName));  // 원본은 보존
-    strtok_r(fileName, " ", &args);
+    char copyFileName[MAXLEN_FILENAME];
+    char* argv[MAXLEN_FILENAME];
+    char* left;
+    int argc = 0;
+
+    strlcpy(copyFileName, (char*)file_name,
+            sizeof(copyFileName));  // 복사; 원본 보존
+    char* token = strtok_r(copyFileName, " ", &left);
+
+    while (token)
+    {
+        argv[argc++] = token;
+        token = strtok_r(NULL, " ", &left);
+    }
 
     /* Allocate and activate page directory. */
     t->pml4 = pml4_create();
@@ -323,7 +332,7 @@ static bool load(const char* file_name, struct intr_frame* if_) {
     process_activate(thread_current());
 
     /* Open executable file. */
-    file = filesys_open(fileName);
+    file = filesys_open(argv[0]);
     if (file == NULL)
     {
         printf("load: %s: open failed\n", file_name);
