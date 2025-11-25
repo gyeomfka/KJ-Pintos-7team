@@ -54,7 +54,18 @@ static bool is_valid_address(void* addr) {
 
 /* The main system call interface */
 void syscall_handler(struct intr_frame* f UNUSED) {
-    // TODO: Your implementation goes here.
-    printf("system call!\n");
+    // SYS_HALT,     /* Halt the operating system. */
+    // SYS_FORK,     /* Clone current process. */
+    // SYS_EXEC,     /* Switch current process. */
+    // SYS_WAIT,     /* Wait for a child process to die. */
+    // SYS_CREATE,   /* Create a file. */
+    // SYS_REMOVE,   /* Delete a file. */
+    // SYS_OPEN,     /* Open a file. */
+    // SYS_FILESIZE, /* Obtain a file's size. */
+    // SYS_READ,     /* Read from a file. */
+    // SYS_WRITE,    /* Write to a file. */
+    // SYS_SEEK,     /* Change position in a file. */
+    // SYS_TELL,     /* Report current position in a file. */
+    // SYS_CLOSE,    /* Close a file. */
     thread_exit();
 }
