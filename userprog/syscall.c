@@ -3,6 +3,7 @@
 #include <syscall-nr.h>
 #include "intrinsic.h"
 #include "threads/flags.h"
+#include "threads/init.h"
 #include "threads/interrupt.h"
 #include "threads/loader.h"
 #include "threads/thread.h"
@@ -54,7 +55,11 @@ static bool is_valid_address(void* addr) {
 
 /* The main system call interface */
 void syscall_handler(struct intr_frame* f UNUSED) {
-    // SYS_HALT,     /* Halt the operating system. */
+    switch (f->R.rax)
+    {
+        case SYS_HALT: power_off();
+        default: thread_exit();
+    }
     // SYS_FORK,     /* Clone current process. */
     // SYS_EXEC,     /* Switch current process. */
     // SYS_WAIT,     /* Wait for a child process to die. */
