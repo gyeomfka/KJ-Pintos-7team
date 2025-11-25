@@ -291,6 +291,16 @@ void thread_unblock(struct thread* t) {
     ASSERT(t->status == THREAD_BLOCKED);
     list_insert_ordered(&ready_list, &t->elem, high_priority_first, NULL);
     t->status = THREAD_READY;
+
+    // 새로 깨어난 t의 우선순위가 현재 스레드보다 높은지 확인
+    if (thread_current() != idle_thread &&
+        t->priority > thread_current()->priority)
+    {
+        if (intr_context())
+            intr_yield_on_return();  // 인터럽트가 끝나면 스케줄링
+        else
+            thread_yield();
+    }
     intr_set_level(old_level);
 }
 

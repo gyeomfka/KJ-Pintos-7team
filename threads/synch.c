@@ -110,13 +110,17 @@ void sema_up(struct semaphore* sema) {
     ASSERT(sema != NULL);
 
     old_level = intr_disable();
+
+    sema->value++;  // 자원은 항상 반납
+
     if (!list_empty(&sema->waiters))
+    {
+        // thread_unblock 내부에서 필요 시 스케줄링 알아서 된다.
         thread_unblock(
             list_entry(list_pop_front(&sema->waiters), struct thread, elem));
+    }
 
-    sema->value++;
     intr_set_level(old_level);
-    thread_yield();
 }
 
 void reorder_sema_waiters(struct semaphore* sema) {
