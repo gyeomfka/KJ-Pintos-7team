@@ -44,6 +44,14 @@ void syscall_init(void) {
               FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
 }
 
+static bool is_valid_address(void* addr) {
+    if (addr == NULL) return false;
+    if (addr >= (void*)USER_STACK) return false;
+    if (pml4_get_page(thread_current()->pml4, addr) == NULL) return false;
+
+    return true;
+}
+
 /* The main system call interface */
 void syscall_handler(struct intr_frame* f UNUSED) {
     // TODO: Your implementation goes here.
