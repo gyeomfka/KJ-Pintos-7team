@@ -132,13 +132,31 @@ void syscall_handler(struct intr_frame* f UNUSED) {
             unsigned size = (unsigned)f->R.rdx;
 
             if (!is_valid_address_buffer(buffer, size))
-                f->R.rax = -1;  // gitbook에 자료가 없다. 표준을 따른다.
-
-            if (fd == 1)
             {
-                putbuf(buffer, size);
-                f->R.rax = size;
+                f->R.rax = -1;  // gitbook에 자료가 없다. 표준을 따른다.
+                break;
             }
+
+            switch (fd)
+            {
+                // 표준 입력(키보드)에 쓰기 할 수는 없다.
+                case 0: {
+                    f->R.rax = -1;
+                    break;
+                }
+
+                // 터미널에 한글자씩 출력
+                case 1: {
+                    putbuf(buffer, size);
+                    f->R.rax = size;
+                    break;
+                }
+
+                default:
+                    f->R.rax =
+                        (unsigned)file_write(curr->fdTable[fd], buffer, size);
+            }
+
             break;
         }
 
