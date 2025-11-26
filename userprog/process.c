@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "devices/timer.h"
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
@@ -182,7 +183,8 @@ int process_exec(void* f_name) {
  * This function will be implemented in problem 2-2.  For now, it
  * does nothing. */
 int process_wait(tid_t child_tid UNUSED) {
-    for (;;);
+    timer_sleep(100);
+
     /* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
      * XXX:       to add infinite loop here before
      * XXX:       implementing the process_wait. */
