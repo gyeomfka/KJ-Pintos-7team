@@ -54,6 +54,15 @@ static bool is_valid_address(void* addr) {
     return true;
 }
 
+// @return index of fdTable or -1 if failed
+static int findFD(struct file** fdTable) {
+    // 0, 1은 STDIN, STDOUT
+    for (int idx = 2; idx <= FD_TABLE_LENGTH; idx++)
+        if (fdTable[idx] == NULL) return idx;
+
+    return -1;
+}
+
 /* The main system call interface */
 void syscall_handler(struct intr_frame* f UNUSED) {
     struct thread* curr = thread_current();
@@ -121,12 +130,29 @@ void syscall_handler(struct intr_frame* f UNUSED) {
             break;
         }
 
+        case SYS_OPEN: {
+            int fd = findFD(curr->fdTable);
+
+            f->R.rax = fd;
+
+            if (fd == -1) break;
+
+            char* fileName = (char*)f->R.rdi;
+            struct file* opened = filesys_open(fileName);
+
+            if (opened)
+                curr->fdTable[fd] = opened;
+            else
+                f->R.rax = -1;  // fail
+
+            break;
+        }
+
         default: thread_exit();
     }
     // SYS_FORK,     /* Clone current process. */
     // SYS_EXEC,     /* Switch current process. */
     // SYS_WAIT,     /* Wait for a child process to die. */
-    // SYS_OPEN,     /* Open a file. */
     // SYS_FILESIZE, /* Obtain a file's size. */
     // SYS_READ,     /* Read from a file. */
     // SYS_SEEK,     /* Change position in a file. */

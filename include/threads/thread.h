@@ -27,6 +27,9 @@ typedef int tid_t;
 #define PRI_DEFAULT 31 /* Default priority. */
 #define PRI_MAX 63     /* Highest priority. */
 
+// file descriptor table
+#define FD_TABLE_LENGTH 128 /* fd 테이블 크기 */
+
 /* A kernel thread or user process.
  *
  * Each thread structure is stored in its own 4 kB page.  The
@@ -103,6 +106,8 @@ struct thread {
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;          /* List element. */
     struct list_elem donation_elem; /* Element for donation_list. */
+
+    struct file* fdTable[FD_TABLE_LENGTH];
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
