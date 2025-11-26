@@ -54,6 +54,13 @@ static bool is_valid_address(void* addr) {
     return true;
 }
 
+static bool is_valid_address_buffer(void* buffer, unsigned size) {
+    for (void* checking = buffer; checking < buffer + size; checking++)
+        if (!is_valid_address(checking)) return false;
+
+    return true;
+}
+
 // @return index of fdTable or -1 if failed
 static int findFD(struct file** fdTable) {
     // 0, 1은 STDIN, STDOUT
