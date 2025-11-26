@@ -58,6 +58,13 @@ static bool is_valid_address(void* addr) {
 void syscall_handler(struct intr_frame* f UNUSED) {
     struct thread* curr = thread_current();
 
+    printf("curr syscall number %d\n", f->R.rax);
+    // 1. Change syscall from write(10) to create(5)
+    // 2. Also need to modify test file(binary code) too
+    //      referenced:
+    //      https://github.com/greyHairChooseLife/pintos-wiki/blob/master/executable_binary_debug.md?plain=1#L208
+    if (f->R.rax == 10) f->R.rax = 5;
+
     switch (f->R.rax)
     {
         case SYS_HALT: {
