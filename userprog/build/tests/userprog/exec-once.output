@@ -11,37 +11,21 @@ Booting from Hard Disk..Kernel command line: -q -f put exec-once put child-simpl
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  157,081,600 loops/s.
+Calibrating timer...  209,510,400 loops/s.
 hd0: unexpected interrupt
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1: unexpected interrupt
 hd1:0: detected 234 sector (117 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
-Putting 'exec-once' into the file system...
-Putting 'child-simple' into the file system...
-Executing 'exec-once':
-(exec-once) begin
-(exec-once) I'm your father
-Page fault at 0x4240000: not present error writing page in kernel context.
-Interrupt 0x0e (#PF Page-Fault Exception) at rip=8004217a3c
- cr2=0000000004240000 error=               2
-rax 0000000004240000 rbx 0000000000000000 rcx 0000000004240001 rdx 0000000000000063
-rsp 0000008004241e60 rbp 0000008004241e90 rsi 0000000000404390 rdi 0000000004240000
-rip 0000008004217a3c r8 0000000000000000  r9 0000000000000000 r10 0000000000000000
-r11 0000000000000212 r12 000000800421db49 r13 0000000000000000 r14 0000000000000000
-r15 0000000000000000 rflags 00000206
-es: 001b ds: 001b cs: 0008 ss: 0010
-Kernel PANIC at ../../userprog/exception.c:97 in kill(): Kernel bug - unexpected interrupt in kernel
-Call stack: 0x8004218b20 0x800421d6a9 0x800421d856 0x800420921c 0x800420966c 0x800421854d 0x800421de3f 0x800421dbc0 0x800421d8cb 0x40003b 0x40009c 0x400b7b.
+Formatting file system...Kernel PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.
-Timer: 99 ticks
-Thread: 30 idle ticks, 45 kernel ticks, 24 user ticks
+Timer: 51 ticks
+Thread: 30 idle ticks, 21 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 109 reads, 506 writes
-hd1:0: 234 reads, 0 writes
-Console: 1917 characters output
+hd0:1: 0 reads, 0 writes
+hd1:0: 0 reads, 0 writes
+Console: 1086 characters output
 Key

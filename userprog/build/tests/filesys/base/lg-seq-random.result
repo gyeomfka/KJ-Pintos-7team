@@ -1,25 +1,4 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (lg-seq-random) begin
-  (lg-seq-random) create "nibble"
-  (lg-seq-random) open "nibble"
-  (lg-seq-random) writing "nibble"
-  (lg-seq-random) close "nibble"
-  (lg-seq-random) open "nibble" for verification
-  (lg-seq-random) verified contents of "nibble"
-  (lg-seq-random) close "nibble"
-  (lg-seq-random) end
-Differences in `diff -u' format:
-  (lg-seq-random) begin
-  (lg-seq-random) create "nibble"
-  (lg-seq-random) open "nibble"
-  (lg-seq-random) writing "nibble"
-- (lg-seq-random) close "nibble"
-- (lg-seq-random) open "nibble" for verification
-- (lg-seq-random) verified contents of "nibble"
-- (lg-seq-random) close "nibble"
-- (lg-seq-random) end
-
-(Process exit codes are excluded for matching purposes.)
+Kernel panic in run: PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0
+Translation of call stack:

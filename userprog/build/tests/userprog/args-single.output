@@ -11,30 +11,21 @@ Booting from Hard Disk..Kernel command line: -q -f put args-single run 'args-sin
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  155,443,200 loops/s.
+Calibrating timer...  209,510,400 loops/s.
 hd0: unexpected interrupt
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1: unexpected interrupt
 hd1:0: detected 117 sector (58 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
-Putting 'args-single' into the file system...
-Executing 'args-single onearg':
-(args) begin
-(args) argc = 2
-(args) argv[0] = 'args-single'
-(args) argv[1] = 'onearg'
-(args) argv[2] = null
-(args) end
-args-single: exit(0)
-Execution of 'args-single onearg' complete.
-Timer: 81 ticks
-Thread: 31 idle ticks, 44 kernel ticks, 7 user ticks
+Formatting file system...Kernel PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 51 ticks
+Thread: 30 idle ticks, 21 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 82 reads, 262 writes
-hd1:0: 117 reads, 0 writes
-Console: 1012 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
+hd0:1: 0 reads, 0 writes
+hd1:0: 0 reads, 0 writes
+Console: 1081 characters output
+Key

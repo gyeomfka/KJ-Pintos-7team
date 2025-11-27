@@ -11,40 +11,19 @@ Booting from Hard Disk..Kernel command line: -q -threads-tests -f run priority-f
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  157,081,600 loops/s.
+Calibrating timer...  209,510,400 loops/s.
 hd0: unexpected interrupt
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1: unexpected interrupt
-Formatting file system...done.
-Boot complete.
-Executing 'priority-fifo':
-(priority-fifo) begin
-(priority-fifo) 16 threads will iterate 16 times in the same order each time.
-(priority-fifo) If the order varies then there is a bug.
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-(priority-fifo) end
-Execution of 'priority-fifo' complete.
-Timer: 92 ticks
-Thread: 30 idle ticks, 63 kernel ticks, 0 user ticks
+Formatting file system...Kernel PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 51 ticks
+Thread: 30 idle ticks, 21 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 9 reads, 18 writes
-Console: 1915 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
+hd0:1: 0 reads, 0 writes
+Console: 967 characters output
+Key

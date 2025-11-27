@@ -1,23 +1,4 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (priority-donate-sema) begin
-  (priority-donate-sema) Thread L acquired lock.
-  (priority-donate-sema) Thread L downed semaphore.
-  (priority-donate-sema) Thread H acquired lock.
-  (priority-donate-sema) Thread H finished.
-  (priority-donate-sema) Thread M finished.
-  (priority-donate-sema) Thread L finished.
-  (priority-donate-sema) Main thread finished.
-  (priority-donate-sema) end
-Differences in `diff -u' format:
-  (priority-donate-sema) begin
-  (priority-donate-sema) Thread L acquired lock.
-- (priority-donate-sema) Thread L downed semaphore.
-- (priority-donate-sema) Thread H acquired lock.
-- (priority-donate-sema) Thread H finished.
-  (priority-donate-sema) Thread M finished.
-- (priority-donate-sema) Thread L finished.
-  (priority-donate-sema) Main thread finished.
-  (priority-donate-sema) end
+Kernel panic in run: PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0
+Translation of call stack:

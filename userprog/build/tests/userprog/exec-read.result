@@ -1,31 +1,4 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (exec-read) begin
-  (exec-read) open "sample.txt"
-  (exec-read) read "sample.txt" first 20 bytes
-  (child-read) begin
-  (child-read) open "sample.txt"
-  (child-read) read "sample.txt" first 20 bytes
-  (child-read) read "sample.txt" remainders
-  (child-read) Child success
-  (child-read) end
-  child-read: exit(0)
-  (exec-read) Parent success
-  (exec-read) end
-  exec-read: exit(0)
-Differences in `diff -u' format:
-  (exec-read) begin
-  (exec-read) open "sample.txt"
-  (exec-read) read "sample.txt" first 20 bytes
-- (child-read) begin
-- (child-read) open "sample.txt"
-- (child-read) read "sample.txt" first 20 bytes
-- (child-read) read "sample.txt" remainders
-- (child-read) Child success
-- (child-read) end
-- child-read: exit(0)
-  (exec-read) Parent success
-  (exec-read) end
-  exec-read: exit(0)
+Kernel panic in run: PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0
+Translation of call stack:

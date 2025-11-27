@@ -1,21 +1,4 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (wait-twice) begin
-  (child-simple) run
-  child-simple: exit(81)
-  (wait-twice) wait(exec()) = 81
-  (wait-twice) wait(exec()) = -1
-  (wait-twice) end
-  wait-twice: exit(0)
-Differences in `diff -u' format:
-  (wait-twice) begin
-- (child-simple) run
-- child-simple: exit(81)
-- (wait-twice) wait(exec()) = 81
-- (wait-twice) wait(exec()) = -1
-+ (wait-twice) wait(exec()) = 69328496
-+ (wait-twice) wait(exec()) = 69328496
-  (wait-twice) end
-  wait-twice: exit(0)
+Kernel panic in run: PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0
+Translation of call stack:

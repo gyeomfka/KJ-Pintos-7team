@@ -11,31 +11,21 @@ Booting from Hard Disk..Kernel command line: -q -f put create-exists run create-
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  157,081,600 loops/s.
+Calibrating timer...  209,510,400 loops/s.
 hd0: unexpected interrupt
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1: unexpected interrupt
 hd1:0: detected 119 sector (59 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
-Putting 'create-exists' into the file system...
-Executing 'create-exists':
-(create-exists) begin
-(create-exists) create quux.dat
-(create-exists) create warble.dat
-(create-exists) try to re-create quux.dat
-(create-exists) create baffle.dat
-(create-exists) try to re-create quux.dat
-(create-exists) end
-create-exists: exit(0)
-Execution of 'create-exists' complete.
-Timer: 94 ticks
-Thread: 30 idle ticks, 47 kernel ticks, 18 user ticks
+Formatting file system...Kernel PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 51 ticks
+Thread: 30 idle ticks, 21 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 165 reads, 334 writes
-hd1:0: 119 reads, 0 writes
-Console: 1110 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
+hd0:1: 0 reads, 0 writes
+hd1:0: 0 reads, 0 writes
+Console: 1076 characters output
+Key

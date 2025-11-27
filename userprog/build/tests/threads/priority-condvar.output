@@ -11,52 +11,19 @@ Booting from Hard Disk..Kernel command line: -q -threads-tests -f run priority-c
 Pintos booting with: 
 	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
 	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  130,867,200 loops/s.
+Calibrating timer...  209,510,400 loops/s.
 hd0: unexpected interrupt
 hd0:0: detected 329 sector (164 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1: unexpected interrupt
-Formatting file system...done.
-Boot complete.
-Executing 'priority-condvar':
-(priority-condvar) begin
-(priority-condvar) Thread priority 23 starting.
-(priority-condvar) Thread priority 22 starting.
-(priority-condvar) Thread priority 21 starting.
-(priority-condvar) Thread priority 30 starting.
-(priority-condvar) Thread priority 29 starting.
-(priority-condvar) Thread priority 28 starting.
-(priority-condvar) Thread priority 27 starting.
-(priority-condvar) Thread priority 26 starting.
-(priority-condvar) Thread priority 25 starting.
-(priority-condvar) Thread priority 24 starting.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 30 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 29 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 28 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 27 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 26 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 25 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 24 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 23 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 22 woke up.
-(priority-condvar) Signaling...
-(priority-condvar) Thread priority 21 woke up.
-(priority-condvar) end
-Execution of 'priority-condvar' complete.
-Timer: 101 ticks
-Thread: 30 idle ticks, 71 kernel ticks, 0 user ticks
+Formatting file system...Kernel PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 51 ticks
+Thread: 30 idle ticks, 21 kernel ticks, 0 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 9 reads, 18 writes
-Console: 2026 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
+hd0:1: 0 reads, 0 writes
+Console: 970 characters output
+Key

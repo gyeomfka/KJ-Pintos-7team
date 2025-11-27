@@ -1,4 +1,4 @@
 FAIL
-Kernel panic in run: PANIC at ../../userprog/exception.c:97 in kill(): Kernel bug - unexpected interrupt in kernel
-Call stack: 0x8004218b20 0x800421d6a9 0x800421d856 0x800420921c 0x800420966c 0x800421854d 0x800421de3f 0x800421dbc0 0x800421d8cb 0x40003b 0x40009c 0x400b7b
+Kernel panic in run: PANIC at ../../threads/thread.c:340 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0x8004218b20 0x8004207372 0x800420a48c 0x8004214f42 0x800420921c 0x800420966c 0x80042075c0
 Translation of call stack:
