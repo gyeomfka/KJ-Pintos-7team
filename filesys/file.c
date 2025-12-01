@@ -13,8 +13,17 @@ struct file {
 /* Opens a file for the given INODE, of which it takes ownership,
  * and returns the new file.  Returns a null pointer if an
  * allocation fails or if INODE is null. */
+/**
+주어진 INODE에 대해 파일을 연다.
+이때 함수는 INODE의 소유권을 가져간다.
+그리고 새로 생성된 파일 객체를 반환한다.
+만약 메모리 할당에 실패하거나 INODE가 null이라면,
+null 포인터를 반환한다.
+
+inode => 디스크 상의 파일을 표현하는 핵심 구조체
+*/
 struct file *
-file_open (struct inode *inode) {
+file_open (struct inode *inode) { 
 	struct file *file = calloc (1, sizeof *file);
 	if (inode != NULL && file != NULL) {
 		file->inode = inode;

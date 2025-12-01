@@ -67,6 +67,7 @@ int main (void) NO_RETURN;
 /* Pintos main program. */
 int
 main (void) {
+	// Booting from Hard Disk..
 	uint64_t mem_end;
 	char **argv;
 
@@ -253,7 +254,10 @@ run_task (char **argv) {
 }
 
 /* Executes all of the actions specified in ARGV[]
-   up to the null pointer sentinel. */
+   up to the null pointer sentinel. 
+   
+   ARGV[]에 지정된 모든 동작을 널 포인터가 나올 때까지 실행한다.
+   */
 static void
 run_actions (char **argv) {
 	/* An action. */

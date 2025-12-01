@@ -8,6 +8,10 @@
 #include "filesys/directory.h"
 #include "devices/disk.h"
 
+#include "threads/synch.h"
+
+struct lock filesys_lock;
+
 /* The disk that contains the file system. */
 struct disk *filesys_disk;
 
@@ -23,6 +27,7 @@ filesys_init (bool format) {
 
 	inode_init ();
 
+	lock_init(&filesys_lock);
 #ifdef EFILESYS
 	fat_init ();
 
@@ -77,13 +82,24 @@ filesys_create (const char *name, off_t initial_size) {
  * otherwise.
  * Fails if no file named NAME exists,
  * or if an internal memory allocation fails. */
+/**
+주어진 NAME을 가진 파일을 연다.
+성공하면 새로 생성된 file 객체를 반환하고,
+그렇지 않으면 null 포인터를 반환한다.
+
+다음과 같은 경우에는 실패한다:
+NAME이라는 이름의 파일이 존재하지 않을 때
+내부적으로 필요한 메모리 할당에 실패했을 때
+ * 
+*/
 struct file *
 filesys_open (const char *name) {
 	struct dir *dir = dir_open_root ();
 	struct inode *inode = NULL;
 
-	if (dir != NULL)
+	if (dir != NULL){
 		dir_lookup (dir, name, &inode);
+	}
 	dir_close (dir);
 
 	return file_open (inode);

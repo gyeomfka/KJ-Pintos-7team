@@ -97,9 +97,24 @@ struct thread {
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
 
+	int init_priority;
+	struct lock *wait_on_lock;
+	struct list donations;
+	struct list_elem donation_elem;
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4;                     /* Page map level 4 */
+	
+	// 새로 추가된 변수 목록
+	int exit_status; // process exit status
+	// struct semaphore wait_sema; // wait()을 위한 세마포어
+	struct list_elem child_elem; // 부모의 자식 리스트에 연결
+	struct thread *parent; // 부모 스레드 포인터
+	
+	struct file **fd_table;
+	int fd_capacity; // 테이블 크기
+
 #endif
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */
@@ -151,5 +166,26 @@ void thread_sleep(int64_t ticks);
 bool cmp_wakeup_tick(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 
 void thread_awake(int64_t ticks);
+
+bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+
+void donate_priority(void);
+
+void remove_donor(struct lock *lock);
+
+void update_priority_for_donations(void);
+
+void preempt_priority(void);
+
+/* user prog */
+void init_fd_table(struct thread *t);
+
+void expand_fd_table(struct thread *t);
+
+int fd_alloc(void);
+
+bool fd_valid(int fd);
+
+bool fd_available(int fd);
 
 #endif /* threads/thread.h */

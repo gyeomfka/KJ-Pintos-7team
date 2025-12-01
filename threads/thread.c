@@ -1,6 +1,7 @@
 #include "threads/thread.h"
 #include <debug.h>
 #include <stddef.h>
+// #include <stdlib.h>  // calloc, free
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,6 +13,7 @@
 #include "threads/vaddr.h"
 #include "intrinsic.h"
 #ifdef USERPROG
+// #include "../include/lib/stdio.h"
 #include "userprog/process.h"
 #endif
 
@@ -211,6 +213,13 @@ thread_create (const char *name, int priority,
 	/* Add to run queue. */
 	thread_unblock (t);
 
+	/* TODO: 스레드의 생성 시점, 현재 priority와 비교 후 yield할지 아닐지*/
+	// struct thread *curr = thread_current();
+	if (thread_get_priority() < priority) {
+		// 새로 생성된 스래드 우선순위가 높을 시
+		thread_yield();
+	}
+
 	return tid;
 }
 
@@ -226,6 +235,25 @@ thread_block (void) {
 	ASSERT (intr_get_level () == INTR_OFF);
 	thread_current ()->status = THREAD_BLOCKED;
 	schedule ();
+}
+
+void print_ready_list(void) {
+	struct list_elem *e;
+
+    /* 인터럽트 비활성화 상태에서 리스트 안전하게 접근 */
+    enum intr_level old_level = intr_disable();
+
+    for (e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
+        struct thread *t = list_entry(e, struct thread, elem);
+    }
+
+    intr_set_level(old_level);
+}
+
+bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) {
+	struct thread *ta = list_entry(a, struct thread, elem);
+	struct thread *tb = list_entry(b, struct thread, elem);
+	return ta->priority > tb->priority;
 }
 
 /* Transitions a blocked thread T to the ready-to-run state.
@@ -244,9 +272,15 @@ thread_unblock (struct thread *t) {
 
 	old_level = intr_disable ();
 	ASSERT (t->status == THREAD_BLOCKED);
-	list_push_back (&ready_list, &t->elem);
+/**
+ * 기존 list_push_back 함수를 -> priority 내림차순으로 정렬해서 thread를 정렬하도록 재정의
+*/
+	// list_push_back (&ready_list, &t->elem);
+	list_insert_ordered(&ready_list, &t->elem, (list_less_func *) cmp_priority, NULL);
 	t->status = THREAD_READY;
+
 	intr_set_level (old_level);
+	// print_ready_list();
 }
 
 /* Returns the name of the running thread. */
@@ -307,16 +341,44 @@ thread_yield (void) {
 
 	old_level = intr_disable ();
 	if (curr != idle_thread)
-		list_push_back (&ready_list, &curr->elem);
+		//TODO: list order로 변경
+		// list_push_back (&ready_list, &curr->elem);
+		list_insert_ordered(&ready_list, &curr->elem, (list_less_func *) cmp_priority, NULL);
+
 	do_schedule (THREAD_READY);
 	intr_set_level (old_level);
+}
+
+bool is_highest_priority(struct thread *curr) {
+	struct list_elem *e;
+	bool result;
+    /* 인터럽트 비활성화 상태에서 리스트 안전하게 접근 */
+    enum intr_level old_level = intr_disable();
+
+	e = list_begin(&ready_list);
+	struct thread *hightst_thread = list_entry(e, struct thread, elem);
+	if (curr->priority < hightst_thread->priority) {
+		result = false;
+	} else {
+		result = true;
+	}
+    intr_set_level(old_level);
+	return result;
 }
 
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->priority = new_priority;
+	struct thread *curr = thread_current();
+	// curr->priority = new_priority;
+	curr->init_priority = new_priority;
+	update_priority_for_donations();
+	// if (!is_highest_priority(curr)) {
+	// 	thread_yield();
+	// }
+	preempt_priority();
 }
+
 
 /* Returns the current thread's priority. */
 int
@@ -410,9 +472,14 @@ init_thread (struct thread *t, const char *name, int priority) {
 	memset (t, 0, sizeof *t);
 	t->status = THREAD_BLOCKED;
 	strlcpy (t->name, name, sizeof t->name);
+
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
 	t->magic = THREAD_MAGIC;
+	t->init_priority = priority;
+	t->wait_on_lock = NULL;
+
+	list_init(&(t->donations));
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -598,7 +665,6 @@ allocate_tid (void) {
 }
 
 void thread_sleep(int64_t ticks) {
-	// printf(" ::: test  ::: %lld", ticks);
 	enum intr_level old_level = intr_disable(); // 인터럽트 비활성화
 
 	struct thread *cur = thread_current();
@@ -636,4 +702,107 @@ void thread_awake(int64_t ticks) {
 	}
 
 	intr_set_level(old_level); // 인터럽트 상태를 원래 상태로 변경
+}
+
+void donate_priority(void)
+{
+	struct thread *curr = thread_current();
+	struct thread *holder;
+
+	int priority = curr->priority;
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (curr->wait_on_lock == NULL)
+			return;
+
+		holder = curr->wait_on_lock->holder;
+		holder->priority = priority;
+		curr = holder;
+	}
+}
+
+void remove_donor(struct lock *lock)
+{
+	struct list *donations = &(thread_current()->donations);
+	struct list_elem *donor_elem;
+	struct thread *donor_thread;
+
+	if (list_empty(donations))
+		return;
+
+	donor_elem = list_front(donations);
+
+	while (1)
+	{
+		donor_thread = list_entry(donor_elem, struct thread, donation_elem);
+		if (donor_thread->wait_on_lock == lock)
+			list_remove(&donor_thread->donation_elem);
+		donor_elem = list_next(donor_elem);
+		if (donor_elem == list_end(donations))
+			return;
+	}
+}
+
+void preempt_priority(void)
+{
+    if (thread_current() == idle_thread)
+        return;
+    if (list_empty(&ready_list))
+        return;
+    struct thread *curr = thread_current();
+    struct thread *ready = list_entry(list_front(&ready_list), struct thread, elem);
+    if (curr->priority < ready->priority) // ready_list에 현재 실행중인 스레드보다 우선순위가 높은 스레드가 있으면
+        thread_yield();
+}
+
+void init_fd_table(struct thread *t)
+{
+	t->fd_capacity = 64;
+	t->fd_table = calloc(t->fd_capacity, sizeof(struct file *));
+	t->fd_table[0] = STDIN_FILENO;   // console input handle
+	t->fd_table[1] = STDOUT_FILENO;  // console output handle
+}
+
+void expand_fd_table(struct thread *t)
+{
+	int new_capacity = t->fd_capacity * 2;
+	struct file **new_table = calloc(new_capacity, sizeof(struct file *));
+
+	for (int i = 0; i < t->fd_capacity; i++) {
+		new_table[i] = t->fd_table[i];
+	}
+	
+	free(t->fd_table);
+
+	t->fd_table = new_table;
+	t->fd_capacity = new_capacity;
+}
+
+int fd_alloc(void)
+{
+	struct thread *t = thread_current();
+
+	if (t->fd_table == NULL)  // 한 번만 초기화
+        init_fd_table(t);
+
+	for (int i = 2; i < t->fd_capacity; i++) {
+		if (t->fd_table[i] == NULL)
+			return i;
+	}
+
+	expand_fd_table(t);
+	return fd_alloc();
+}
+
+bool fd_valid(int fd)
+{
+	struct thread *t = thread_current();
+	return (fd >= 0 && fd < t->fd_capacity);
+}
+
+bool fd_available(int fd)
+{
+	struct thread *t = thread_current();
+	return fd_valid(fd) && t->fd_table[fd] != NULL;
 }

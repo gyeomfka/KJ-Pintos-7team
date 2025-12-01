@@ -147,7 +147,6 @@ timer_sleep (int64_t ticks) { //param == 스레드를 잠들게 할 타이머 �
 	// thread_block();
 	// struct thread *this_t = thread_current ();
 	// this_t->wakeup_ticks = start + ticks;
-	// printf(" ::: sleep test ::: ");
 	thread_sleep(start + ticks);
 }
 
@@ -184,7 +183,6 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
-	// putbuf(" ::: interrupt test ::: \n", 23);
 	// enum intr_level old_level = intr_disable();
 	thread_awake(ticks);
 	// intr_set_level(old_level);

@@ -72,10 +72,17 @@ dir_get_inode (struct dir *dir) {
 }
 
 /* Searches DIR for a file with the given NAME.
+DIR에서 이름(NAME)과 일치하는 파일을 검색합니다.
  * If successful, returns true, sets *EP to the directory entry
+ 검색이 성공하면 true를 반환합니다.
+만약 EP 포인터가 NULL이 아니라면, 해당 디렉터리 엔트리(directory entry)를 *EP에 저장합니다.
  * if EP is non-null, and sets *OFSP to the byte offset of the
  * directory entry if OFSP is non-null.
- * otherwise, returns false and ignores EP and OFSP. */
+ 만약 OFSP 포인터가 NULL이 아니라면, 디렉터리 엔트리의 바이트 오프셋(offset) 값을 *OFSP에 저장합니다.
+ * otherwise, returns false and ignores EP and OFSP. 
+ 검색에 실패하면 false를 반환하며, EP와 OFSP는 무시됩니다.
+ */
+
 static bool
 lookup (const struct dir *dir, const char *name,
 		struct dir_entry *ep, off_t *ofsp) {
@@ -98,9 +105,17 @@ lookup (const struct dir *dir, const char *name,
 }
 
 /* Searches DIR for a file with the given NAME
+ DIR에서 NAME과 일치하는 파일을 검색합니다.
  * and returns true if one exists, false otherwise.
+ 파일이 존재하면 true를 반환
+ 존재하지 않으면 false를 반환
  * On success, sets *INODE to an inode for the file, otherwise to
- * a null pointer.  The caller must close *INODE. */
+ 검색에 성공하면 *INODE에 해당 파일의 inode를 설정
+ 실패하면 *INODE에 NULL을 설정
+ * a null pointer.  The caller must close *INODE. 
+ INODE를 사용한 후에는 호출자가 반드시 inode_close(*INODE) 등으로 닫아야 함
+ */
+
 bool
 dir_lookup (const struct dir *dir, const char *name,
 		struct inode **inode) {
@@ -109,10 +124,12 @@ dir_lookup (const struct dir *dir, const char *name,
 	ASSERT (dir != NULL);
 	ASSERT (name != NULL);
 
-	if (lookup (dir, name, &e, NULL))
+	if (lookup (dir, name, &e, NULL)) {
 		*inode = inode_open (e.inode_sector);
-	else
+	}
+	else {
 		*inode = NULL;
+	}
 
 	return *inode != NULL;
 }

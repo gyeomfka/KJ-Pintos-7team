@@ -18,6 +18,9 @@
 #include "threads/mmu.h"
 #include "threads/vaddr.h"
 #include "intrinsic.h"
+
+#include "devices/timer.h"
+
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -39,7 +42,7 @@ process_init (void) {
  * thread id, or TID_ERROR if the thread cannot be created.
  * Notice that THIS SHOULD BE CALLED ONCE. */
 tid_t
-process_create_initd (const char *file_name) {
+process_create_initd (const char *file_name) { //file_name == args-sinigle onearg
 	char *fn_copy;
 	tid_t tid;
 
@@ -168,6 +171,14 @@ process_exec (void *f_name) {
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
 	 * it stores the execution information to the member. */
+	/**
+	 * 스레드 구조체 안에 있는 intr_frame을 사용할 수 없다.
+		그 이유는 현재 스레드가 스케줄링으로 인해 다른 스레드로 교체될 때,
+		실행 중이던 CPU 상태(실행 정보)가 그 멤버(intr_frame)에 저장되기 때문이다.
+		즉,
+		intr_frame은 스레드가 문맥 교환될 때마다 덮어써지는 영역이라서
+		안정적으로 사용할 수 없다는 뜻이다.
+	*/
 	struct intr_frame _if;
 	_if.ds = _if.es = _if.ss = SEL_UDSEG;
 	_if.cs = SEL_UCSEG;
@@ -199,11 +210,30 @@ process_exec (void *f_name) {
  *
  * This function will be implemented in problem 2-2.  For now, it
  * does nothing. */
+/**
+지정된 TID 스레드가 종료될 때까지 기다린 후, 해당 스레드의 exit status(종료 상태) 를 반환한다.
+만약 그 스레드가 커널에 의해 강제로 종료된 경우(예: 예외로 kill된 경우), -1을 반환한다.
+다음과 같은 경우에도 즉시 -1을 반환하며 기다리지 않는다.
+전달된 TID가 유효하지 않은 경우
+해당 TID가 현재 프로세스의 자식 프로세스가 아닌 경우
+이미 process_wait()가 한 번 성공적으로 호출된 경우 (즉, 같은 자식에 대해 두 번 기다릴 수 없음)
+이 함수는 Project 2-2에서 직접 구현해야 한다.
+지금 현재 제공된 버전은 아무 동작도 하지 않는다.
+*/
 int
 process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
+	/**
+	Pintos는 process_wait(initd) 호출 시 종료되어 버린다.
+	따라서 process_wait을 구현하기 전에,
+	여기(현재 위치)에 **무한 루프를 추가해 둘 것을 권장한다.
+	*/
+	for (int i = 0; i < 2000000000; i++) {
+
+	}
+	// timer_sleep(10);
 	return -1;
 }
 
@@ -215,7 +245,9 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-
+	if (curr->pml4) {
+		printf ("%s: exit(%d)\n", curr->name, curr->exit_status);
+	}
 	process_cleanup ();
 }
 
@@ -228,7 +260,7 @@ process_cleanup (void) {
 	supplemental_page_table_kill (&curr->spt);
 #endif
 
-	uint64_t *pml4;
+	uint64_t *pml4; // page table
 	/* Destroy the current process's page directory and switch back
 	 * to the kernel-only page directory. */
 	pml4 = curr->pml4;
@@ -320,6 +352,12 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
  * Stores the executable's entry point into *RIP
  * and its initial stack pointer into *RSP.
  * Returns true if successful, false otherwise. */
+/**
+“FILE_NAME 에서 ELF 실행 파일을 읽어 현재 스레드에 적재한다.
+실행 파일의 ‘진입 지점(entry point)’을 *RIP 에 저장하고,
+프로그램의 ‘초기 스택 포인터(initial stack pointer)’를 *RSP 에 저장한다.
+성공하면 true, 실패하면 false 를 반환한다.”
+*/
 static bool
 load (const char *file_name, struct intr_frame *if_) {
 	struct thread *t = thread_current ();
@@ -329,14 +367,40 @@ load (const char *file_name, struct intr_frame *if_) {
 	bool success = false;
 	int i;
 
+	int index = 0; 
+	char *argv[64];
+
+	char f_name[128];
+	strlcpy(f_name, file_name, sizeof(f_name) - 1);
+	f_name[sizeof(f_name) - 1] = '\0'; // 안전하게 null 종료
+
 	/* Allocate and activate page directory. */
+	/* pml4 -> x86-64 아키텍처 최상위 페이지 테이블 (page map level 4)*/
 	t->pml4 = pml4_create ();
 	if (t->pml4 == NULL)
 		goto done;
+		
 	process_activate (thread_current ());
 
+	char *token, *save_ptr;
+
+	for (token = strtok_r(f_name, " ", &save_ptr); token != NULL; token = strtok_r(NULL, " ", &save_ptr))
+	{
+		argv[index++] = token;
+		// ++index;
+	}
+	
+	// thread_current ()->name; -> argv[0]  이름이 변경되어야 한다.
+	// strlcpy 활용해서 thread 이름 변경해줘얗나다. 
+	// struct thread *t = thread_current();
+	strlcpy(t->name, argv[0], sizeof(t->name));
+
+	file = filesys_open(argv[0]);
+
 	/* Open executable file. */
-	file = filesys_open (file_name);
+	// file = filesys_open (file_name);
+	// file = filesys_open (token);
+
 	if (file == NULL) {
 		printf ("load: %s: open failed\n", file_name);
 		goto done;
@@ -408,7 +472,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	}
 
 	/* Set up stack. */
-	if (!setup_stack (if_))
+	if (!setup_stack (if_)) 
 		goto done;
 
 	/* Start address. */
@@ -416,8 +480,79 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
+	/**
+	 * #define USER_STACK 0x47480000
+	
+	    1. kernel: 파라미터 문자열 파싱 (strtok_r)
+		2. kernel: argv[] 배열을 만들어 token을 저장
 
+		3. kernel: user stack으로 token 문자열x을 push
+		4. kernel: user stack으로 argv[] 포인터들을 push
+		5. kernel: argc push
+
+		6. kernel: fake return address push
+		7. CPU registers 세팅
+		8. user program의 entry 시작
+
+		- argv[] 배열 → OK
+		- 다음 단계 = argv 문자열을 user stack에 복사
+		- 그 다음 단계 = argv 포인터 배열을 user stack에 push
+		- 마지막 단계 = argc, argv 주소를 레지스터로 전달
+	*/
+	// uintptr_t esp_uint = (uintptr_t)esp;
+	char *saved_ptrs[64];
+    // uint8_t *esp = USER_STACK; // stack pointer 시작 지점 설정 다시 
+
+    for (int i = index - 1; i >= 0; --i) {
+        int len = strlen(argv[i]) + 1;
+        if_->rsp -= len;
+        memcpy((void *)if_->rsp, argv[i], len);
+        saved_ptrs[i] = (char *)if_->rsp;
+        // printf("copied argv[%d] -> %p (len=%d)\n", i, (void *)saved_ptrs[i], len);
+    }
+
+    if_->rsp &= ~0x7;
+
+    //argv 배열 : 먼저 NULL을 push, 그 다음 역순으로 saved_ptr push
+    if_->rsp -= sizeof(char *);
+    *(char **)if_->rsp = NULL;
+
+    for (int i = index - 1; i >= 0; --i) {
+        if_->rsp -= sizeof (char *);
+        *(char **)if_->rsp = saved_ptrs[i];
+        // printf("pushed argv[%d] pointer: %p (saved_ptrs[%d] = %p)\n",
+        //     i, (void *)if_->rsp, i, (void *)saved_ptrs[i]);
+    }
+    
+    uint64_t argv_start_ptr = (uint64_t)if_->rsp;
+
+    // if_->rsp -= sizeof(int);
+    // *(int *)if_->rsp = index;
+
+    if_->rsp -= sizeof (void (*));
+    memset(if_->rsp, 0, sizeof (void (*)));
+
+    if_->R.rdi = index; // argc
+    if_->R.rsi = argv_start_ptr; // argv[0]
+
+    // printf("final: rsp=%p, argc=%d, argv=%p\n", (void *)if_->rsp, index, (void *)if_->R.rsi);
+    // hex_dump(if_->rsp, if_->rsp, USER_STACK - if_->rsp, true);
 	success = true;
+	/**
+	 * 1. Argument Passing
+	 * 커널이 사용자 프로그램을 메모리에 로드함 -> 커널은 사용자 스택의 최상단에 프로그램 실행에 필요한 인자들(argc, argv)을
+	 * 미리 쌓아둠 -> CPU의 스택 포인터(esp)를 그 위치로 세팅
+	 * 
+	 * 2. 프로그램 실행(User Mode)
+	 * 커널이 CPU의 제어권을 사용자 프로그램에게 넘김 (iret등) -> 코드는 이제 User Mode에서 돔 -> 사용자 프로그램은 main함수부터
+	 * 시작하여 로직을 수행
+	 * 
+	 * 3. System call 호출(user -> kernel)
+	 * 사용자 프로그램이 실행되다가 -> 하드웨어 접근이 필요함 -> 사용자 직접 못함 -> system call 호출
+	 * 내부적으로 라이브러리가 레지스터에 시스템 콜 번호와 인자를 세팅 -> 인터럽트(int 0x30)를 발생
+	 * 
+	 * 4. system call handler 진입
+	*/
 
 done:
 	/* We arrive here whether the load is successful or not. */
